@@ -1,0 +1,32 @@
+# Node
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+.next/
+.turbo/
+
+# Env
+.env
+backend/.env
+frontend/.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Vite
+frontend/.vite
+
+# Logs
+logs/
+*.log
+
+# Editor
+.vscode/.history
+.idea/

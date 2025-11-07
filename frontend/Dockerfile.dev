@@ -1,0 +1,15 @@
+FROM node:20-alpine
+WORKDIR /app
+
+# Install deps separately to leverage Docker layer caching
+COPY package*.json ./
+RUN npm install
+
+# Copy source for live reload
+COPY . .
+
+# Use Vite's default dev port to avoid common 3000 conflicts
+EXPOSE 5173
+
+# Bind to all interfaces and pin the port so port mapping is stable
+CMD ["npm", "run", "dev", "--", "--host", "--port", "5173"]

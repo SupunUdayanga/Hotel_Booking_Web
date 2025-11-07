@@ -1,0 +1,6 @@
+{
+  // Suppress VS Code's CSS warning for Tailwind's @config directive in CSS files
+  "css.lint.unknownAtRules": "ignore",
+  // Ensure the Tailwind CSS IntelliSense extension picks up the config from the frontend folder
+  "tailwindCSS.config": "frontend/tailwind.config.js"
+}

@@ -1,0 +1,47 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+/* Lightweight, framework-neutral button styles
+	 (No @apply to avoid toolchain warnings) */
+.btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.5rem;
+	padding: 0.5rem 1rem; /* py-2 px-4 */
+	border-radius: 0.375rem; /* rounded-md */
+	font-weight: 600;
+	font-size: 0.875rem; /* text-sm */
+	line-height: 1.25rem;
+	transition: all 150ms ease;
+	box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn:focus{ outline: none; box-shadow: 0 0 0 3px rgba(99,102,241,0.4); }
+.btn:disabled{ opacity: .5; cursor: not-allowed; }
+
+.btn-primary{
+	color: #fff;
+	background-image: linear-gradient(to right, rgb(79 70 229), rgb(217 70 239)); /* indigo-600 -> fuchsia-600 */
+}
+.btn-primary:hover{ filter: brightness(1.05); }
+
+.btn-outline{
+	color: #374151; /* gray-700 */
+	background: #fff;
+	border: 1px solid #D1D5DB; /* gray-300 */
+}
+.btn-outline:hover{ background: #F9FAFB; }
+
+.btn-soft{
+	color: #4338CA; /* indigo-700 */
+	background: #EEF2FF; /* indigo-50 */
+}
+.btn-soft:hover{ background: #E0E7FF; }
+
+.btn-danger{
+	color: #fff; background: #DC2626;
+}
+.btn-danger:hover{ background: #EF4444; }
+
+.btn-link{ color: #4F46E5; background: transparent; padding: 0; box-shadow: none; }
+.btn-link:hover{ text-decoration: underline; }
