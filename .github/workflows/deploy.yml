@@ -1,0 +1,34 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main  # This means: Run this whenever code is pushed to 'main' branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Remote into EC2 and Deploy
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          port: 22
+          script: |
+            # 1. Go to the project folder
+            cd ~/Hotel_Booking_Web
+            
+            # 2. Get the latest code from GitHub
+            git pull origin main
+            
+            # 3. Rebuild and Restart the specific production containers
+            docker compose -f docker-compose.prod.yml up -d --build
+            
+            # 4. Cleanup old image files to save space
+            docker image prune -f
