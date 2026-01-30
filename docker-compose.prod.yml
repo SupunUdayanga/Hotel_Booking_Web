@@ -6,9 +6,9 @@ services:
       - mongo_data:/data/db
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    # NOW: Uses the pre-built image from Docker Hub
+    # ${TAG:-latest} means: "Use the specific tag if given, otherwise use 'latest'"
+    image: supun14022/hotel_booking_web-backend:${TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env
@@ -18,9 +18,8 @@ services:
       - mongo
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    # NOW: Uses the pre-built image from Docker Hub
+    image: supun14022/hotel_booking_web-frontend:${TAG:-latest}
     restart: unless-stopped
     ports:
       - "80:80"
