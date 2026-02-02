@@ -22,7 +22,7 @@ const Footer = () => {
         </Link>
         <nav className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-300">
           <Link to="/">Home</Link>
-          <Link to="/hotels">Hotels</Link>
+          <Link to="/hotels">HotelsHotel</Link>
           <Link to="/contact">Contact</Link>
           <a href="tel:+10000000000">+1 (000) 000-0000</a>
         </nav>
