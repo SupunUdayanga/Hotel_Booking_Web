@@ -22,7 +22,7 @@ const Footer = () => {
         </Link>
         <nav className="mt-4 flex flex-wrap items-center justify-center gap-4 text-sm text-gray-600 dark:text-gray-300">
           <Link to="/">Home</Link>
-          <Link to="/hotels">HotelsHotel</Link>
+          <Link to="/hotels">Hotels</Link>
           <Link to="/contact">Contact</Link>
           <a href="tel:+10000000000">+1 (000) 000-0000</a>
         </nav>
@@ -45,7 +45,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Support</h4>
             <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
               <li><a href="tel:+10000000000" className="hover:text-gray-900 dark:hover:text-white">+1 (000) 000-0000</a></li>
-              <li><a href="mailto:support@example.com" className="hover:text-gray-900 dark:hover:text-white">support@example.com</a></li>
+              <li><a href="mailto:support@example.com" className="hover:text-gray-900 dark:hover:text-white">support123@example.com</a></li>
               <li><Link to="/my-bookings" className="hover:text-gray-900 dark:hover:text-white">My bookings</Link></li>
             </ul>
           </div>
