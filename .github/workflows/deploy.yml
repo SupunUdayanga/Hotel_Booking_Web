@@ -27,8 +27,11 @@ jobs:
             # 2. Get the latest code from GitHub
             git pull origin main
             
-            # 3. Rebuild and Restart the specific production containers
-            docker compose -f docker-compose.prod.yml up -d --build
+            # 3. Build images from the updated source (pull newer base images too)
+            docker compose -f docker-compose.prod.yml build --pull
+
+            # 4. Restart containers (recreate only if image/config changed)
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
             
-            # 4. Cleanup old image files to save space
+            # 5. Cleanup old image files to save space
             docker image prune -f

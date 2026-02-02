@@ -6,7 +6,11 @@ services:
       - mongo_data:/data/db
 
   backend:
-    # NOW: Uses the pre-built image from Docker Hub
+    # Build from the checked-out source on the server.
+    # Keeping `image:` lets you optionally tag the built image (no push happens unless you explicitly push).
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod
     # ${TAG:-latest} means: "Use the specific tag if given, otherwise use 'latest'"
     image: supun14022/hotel_booking_web-backend:${TAG:-latest}
     restart: unless-stopped
@@ -18,7 +22,10 @@ services:
       - mongo
 
   frontend:
-    # NOW: Uses the pre-built image from Docker Hub
+    # Build from the checked-out source on the server (React build -> Nginx runtime).
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     image: supun14022/hotel_booking_web-frontend:${TAG:-latest}
     restart: unless-stopped
     ports:
