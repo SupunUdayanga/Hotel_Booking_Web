@@ -3,17 +3,17 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main  # This means: Run this whenever code is pushed to 'main' branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Remote into EC2 and Deploy
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -21,17 +21,22 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            # 1. Go to the project folder
+            # 1. Go to project folder
             cd ~/Hotel_Booking_Web
             
-            # 2. Get the latest code from GitHub
+            # 2. Get latest changes
             git pull origin main
             
-            # 3. Build images from the updated source (pull newer base images too)
-            docker compose -f docker-compose.prod.yml build --pull
-
-            # 4. Restart containers (recreate only if image/config changed)
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            # 3. Stop the current containers (Safe reset)
+            docker compose -f docker-compose.prod.yml down
             
-            # 5. Cleanup old image files to save space
+            # 4. Remove the old frontend image completely (Force Docker to forget it)
+            # Replace 'hotel_booking_web-frontend' with your ACTUAL image name if different
+            docker rmi hotel_booking_web-frontend || true
+            
+            # 5. Rebuild from scratch (No Cache)
+            # --no-cache: Tells Docker "Don't use old files, read everything fresh"
+            docker compose -f docker-compose.prod.yml up -d --build --force-recreate --no-cache
+            
+            # 6. Clean up space
             docker image prune -f
