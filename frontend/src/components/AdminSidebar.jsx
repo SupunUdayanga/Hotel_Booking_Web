@@ -14,7 +14,7 @@ export default function AdminSidebar() {
   return (
     <aside className="hidden md:block md:w-64 shrink-0 border-r bg-white dark:bg-gray-900 dark:border-gray-800">
       <div className="p-4">
-        <p className="text-xs font-semibold text-gray-500 mb-2 dark:text-gray-400">Admin</p>
+        <p className="text-xs font-semibold text-gray-500 mb-2 dark:text-gray-400">AAAAAdmin</p>
         <nav className="grid gap-1">
           {links.map((l) => (
             <NavLink
