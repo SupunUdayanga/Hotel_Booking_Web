@@ -3,17 +3,17 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - main  # This means: Run this whenever code is pushed to 'main' branch
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Remote into EC2 and Deploy
+      - name: Deploy via SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -21,17 +21,30 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           port: 22
           script: |
-            # 1. Go to the project folder
-            cd ~/Hotel_Booking_Web
-            
-            # 2. Get the latest code from GitHub
-            git pull origin main
-            
-            # 3. Build images from the updated source (pull newer base images too)
-            docker compose -f docker-compose.prod.yml build --pull
+            # Stop the script if any command fails
+            set -e
 
-            # 4. Restart containers (recreate only if image/config changed)
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
-            
-            # 5. Cleanup old image files to save space
+            echo "🚀 Starting Deployment..."
+
+            # 1. Navigate to project folder
+            cd ~/Hotel_Booking_Web
+
+            # 2. Force Git to exactly match the repository
+            # (Fixes issues where local changes block updates)
+            git fetch --all
+            git reset --hard origin/main
+
+            # 3. Stop running containers
+            docker compose -f docker-compose.prod.yml down
+
+            # 4. Force Rebuild from Source (Crucial for updates)
+            # --no-cache: Forces Docker to ignore old versions and rebuild fresh
+            docker compose -f docker-compose.prod.yml build --no-cache
+
+            # 5. Start the containers
+            docker compose -f docker-compose.prod.yml up -d --force-recreate
+
+            # 6. Cleanup to save space
             docker image prune -f
+            
+            echo "✅ Deployment Successful"
