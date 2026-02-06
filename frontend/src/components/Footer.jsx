@@ -45,7 +45,7 @@ const Footer = () => {
             <h4 className="text-sm font-semibold text-gray-900 dark:text-white">Support</h4>
             <ul className="mt-3 space-y-2 text-sm text-gray-600 dark:text-gray-300">
               <li><a href="tel:+10000000000" className="hover:text-gray-900 dark:hover:text-white">+1 (000) 000-0000</a></li>
-              <li><a href="mailto:support@example.com" className="hover:text-gray-900 dark:hover:text-white">support123@example.com</a></li>
+              <li><a href="mailto:support@example.com" className="hover:text-gray-900 dark:hover:text-white">support12@example.com</a></li>
               <li><Link to="/my-bookings" className="hover:text-gray-900 dark:hover:text-white">My bookings</Link></li>
             </ul>
           </div>
