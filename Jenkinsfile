@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-        // Change these to your actual Docker Hub repository names
+        // Your Docker Hub Repositories
         DOCKER_BACKEND_IMAGE = "supun14022/hotel_booking_web-backend"
         DOCKER_FRONTEND_IMAGE = "supun14022/hotel_booking_web-frontend"
         
-        // Your EC2 IP Address
+        // Your AWS EC2 Public IP
         EC2_IP = "16.16.211.50" 
     }
 
@@ -18,24 +18,35 @@ pipeline {
                     git branch: 'main', url: 'https://github.com/SupunUdayanga/Hotel_Booking_Web.git'
                 }
                 script {
-                    // Generate a short commit hash (e.g., a1b2c3d) to tag images
+                    // Create a unique tag using the Git Commit Hash (e.g., a1b2c3d)
                     env.SHORT_COMMIT = sh(
                         script: 'git rev-parse --short=7 HEAD',
                         returnStdout: true
                     ).trim()
-                    echo "✅ Target Commit: ${env.SHORT_COMMIT}"
+                    echo "✅ Version Tag: ${env.SHORT_COMMIT}"
                 }
             }
         }
 
-        // --- STAGE 2: Build Images (Parallel) ---
-        stage('Build Docker Images') {
+        // --- STAGE 2: Build & Push Images ---
+        stage('Build & Push to Docker Hub') {
             parallel {
                 stage('Backend') {
                     steps {
                         dir('backend') {
                             script {
+                                // Build
                                 sh "docker build -t ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT} ."
+                                
+                                // Login & Push
+                                withCredentials([usernamePassword(credentialsId: 'dockercredentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                                    sh "docker push ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT}"
+                                    
+                                    // Also update 'latest' tag
+                                    sh "docker tag ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT} ${DOCKER_BACKEND_IMAGE}:latest"
+                                    sh "docker push ${DOCKER_BACKEND_IMAGE}:latest"
+                                }
                             }
                         }
                     }
@@ -44,8 +55,18 @@ pipeline {
                     steps {
                         dir('frontend') {
                             script {
-                                // Network host often needed for frontend builds fetching dependencies
+                                // Build (using network host for better dependency fetching)
                                 sh "docker build --network=host -t ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT} ."
+                                
+                                // Login & Push
+                                withCredentials([usernamePassword(credentialsId: 'dockercredentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                                    sh "docker push ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT}"
+                                    
+                                    // Also update 'latest' tag
+                                    sh "docker tag ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT} ${DOCKER_FRONTEND_IMAGE}:latest"
+                                    sh "docker push ${DOCKER_FRONTEND_IMAGE}:latest"
+                                }
                             }
                         }
                     }
@@ -53,60 +74,33 @@ pipeline {
             }
         }
 
-        // --- STAGE 3: Push to Registry ---
-        stage('Push to Docker Hub') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'dockercredentials', 
-                    usernameVariable: 'DOCKER_USER', 
-                    passwordVariable: 'DOCKER_PASS'
-                )]) {
-                    script {
-                        sh "echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin"
-
-                        // Push specific version
-                        sh "docker push ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT}"
-                        sh "docker push ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT}"
-
-                        // Update 'latest' tag as well
-                        sh "docker tag ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT} ${DOCKER_BACKEND_IMAGE}:latest"
-                        sh "docker push ${DOCKER_BACKEND_IMAGE}:latest"
-
-                        sh "docker tag ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT} ${DOCKER_FRONTEND_IMAGE}:latest"
-                        sh "docker push ${DOCKER_FRONTEND_IMAGE}:latest"
-                        
-                        sh "docker logout"
-                    }
-                }
-            }
-        }
-
-        // --- STAGE 4: Deploy to AWS EC2 ---
+        // --- STAGE 3: Deploy to AWS EC2 ---
         stage('Deploy to EC2') {
             steps {
                 sshagent(credentials: ['ec2-ssh-key']) {
                     script {
                         def remoteCommand = """
-                            # Stop immediately if any command fails
+                            # Stop if any command fails
                             set -e
                             
                             echo '🚀 Starting Deployment on EC2...'
                             
-                            # 1. Navigate to folder
+                            # 1. Navigate to project folder
                             cd ~/Hotel_Booking_Web
                             
-                            # 2. Update the docker-compose file itself (in case you changed configs)
+                            # 2. Update the docker-compose.prod.yml file from GitHub
                             git pull origin main
                             
-                            # 3. Pull the EXACT version we just built
-                            # We pass the TAG variable so it knows which version to get
+                            # 3. Define the Version Tag we just built
                             export TAG=${env.SHORT_COMMIT}
+                            
+                            # 4. Pull the NEW images from Docker Hub (Fast download)
                             docker compose -f docker-compose.prod.yml pull
                             
-                            # 4. Restart containers
+                            # 5. Restart containers with the new version
                             docker compose -f docker-compose.prod.yml up -d
                             
-                            # 5. Cleanup space
+                            # 6. Cleanup old Docker images to save disk space
                             docker image prune -f
                             
                             echo '✅ Deployment Complete!'
@@ -119,12 +113,15 @@ pipeline {
         }
     }
 
+    // --- CLEANUP ---
     post {
         always {
             echo "🧹 Cleaning up Jenkins workspace..."
-            // Remove the images from the Jenkins server to save space
+            // Remove the images from the Jenkins server to keep it clean
             sh "docker rmi ${DOCKER_BACKEND_IMAGE}:${env.SHORT_COMMIT} || true"
             sh "docker rmi ${DOCKER_FRONTEND_IMAGE}:${env.SHORT_COMMIT} || true"
+            sh "docker rmi ${DOCKER_BACKEND_IMAGE}:latest || true"
+            sh "docker rmi ${DOCKER_FRONTEND_IMAGE}:latest || true"
         }
     }
 }

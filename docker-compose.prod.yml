@@ -6,9 +6,8 @@ services:
       - mongo_data:/data/db
 
   backend:
-    build:
-      context: ./backend  # <--- CRITICAL: Tells Docker where the code is
-      dockerfile: Dockerfile
+    # CHANGED: Use the image from Docker Hub, tagged with the commit ID
+    image: supun14022/hotel_booking_web-backend:${TAG:-latest}
     restart: unless-stopped
     env_file:
       - .env
@@ -18,12 +17,11 @@ services:
       - mongo
 
   frontend:
-    build:
-      context: ./frontend # <--- CRITICAL: Tells Docker where the code is
-      dockerfile: Dockerfile
+    # CHANGED: Use the image from Docker Hub
+    image: supun14022/hotel_booking_web-frontend:${TAG:-latest}
     restart: unless-stopped
     ports:
-      - "80:80"  # Ensure this matches your specific setup (e.g. 80:3000)
+      - "80:80"  
     depends_on:
       - backend
 
