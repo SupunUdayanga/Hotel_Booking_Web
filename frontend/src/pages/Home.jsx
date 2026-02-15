@@ -73,7 +73,7 @@ const Home = () => {
         <div className="grid items-center gap-6 p-6 md:grid-cols-2 md:p-8">
           {/* Content */}
           <div>
-            <h1 className="text-3xl font-semibold text-gray-900 md:text-4xl dark:text-white">Find your perfect stay</h1>
+            <h1 className="text-3xl font-semibold text-gray-900 md:text-4xl dark:text-white">Supun</h1>
             <p className="mt-2 max-w-xl text-gray-600 dark:text-gray-300">Discover top‑rated hotels, great locations, and the best prices—all in one place.</p>
             <form onSubmit={submitSearch} className="mt-6 grid gap-2 rounded-lg border p-2 text-gray-800 shadow-sm sm:grid-cols-[1fr_1fr_auto] dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100">
               <input value={q} onChange={(e)=>setQ(e.target.value)} placeholder="Search hotel name" className="rounded-md border px-3 py-2 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100" />
